@@ -2,3 +2,4 @@ groq
 python-telegram-bot
 apscheduler
 python-dotenv
+psycopg2-binary
