@@ -588,6 +588,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
     
 
+    # ── Greeting / Help Detection ───────────────────────
+    trigger_words = [
+        "hi", "hello", "hey", "hii", "hlo",
+        "help", "how to use", "commands",
+        "what can you do", "usage"
+    ]
+
+    if any(word in user_text for word in trigger_words):
+        await start(update, context)   # 🔥 shows your full instruction message
+        return
     parsed_list = parse_message(user_text)
 
     for parsed in parsed_list:
