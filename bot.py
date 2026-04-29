@@ -665,6 +665,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply += f"   ⚠️ *Budget warning! {percent:.0f}% used*\n"
 
     await update.message.reply_text(reply, parse_mode="Markdown")
+#-----
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await start(update, context)   # reuse your full instruction message
 # ── Main ──────────────────────────────────────────────────
 
 def main():
@@ -682,6 +685,7 @@ def main():
     app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("summary", summary_command))
     app.add_handler(CommandHandler("budget", budget_command))
     app.add_handler(CommandHandler("recent", recent_command))
