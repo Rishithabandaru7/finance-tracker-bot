@@ -1,4 +1,18 @@
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+    def log_message(self, format, *args):
+        pass
+
+def run_health_server():
+    server = HTTPServer(("0.0.0.0", 8080), HealthHandler)
+    server.serve_forever()
 from datetime import datetime
 from telegram import Update
 from telegram.ext import (
@@ -218,6 +232,12 @@ def main():
     app.add_handler(CommandHandler("recent", recent_command))
     app.add_handler(CommandHandler("delete", delete_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+# Start health check server
+    thread = threading.Thread(target=run_health_server)
+    thread.daemon = True
+    thread.start()
+    print("✅ Health server started")
 
     app.run_polling()
 
