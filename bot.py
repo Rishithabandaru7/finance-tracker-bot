@@ -524,7 +524,7 @@ async def split_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id, first_name = get_user(update)
     user_text = update.message.text
-    await update.message.reply_text("⏳ Processing...")
+    
 
     parsed_list = parse_message(user_text)
 
