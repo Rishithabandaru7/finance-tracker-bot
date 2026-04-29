@@ -586,18 +586,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id, first_name = get_user(update)
     user_text = update.message.text.lower().strip()
 
-    # ── 1. Greeting / Help Detection ───────────────────────
-    trigger_words = [
-        "hi", "hello", "hey", "hii", "hlo",
-        "help", "how", "how to use",
-        "commands", "usage", "what can you do"
-    ]
+    # ── 1. Greeting Detection ───────────────────────────
+    greetings = ["hi", "hello", "hey", "hii", "hlo"]
+    help_words = ["help", "how", "how to use", "commands", "usage"]
 
-    if any(word in user_text for word in trigger_words):
-        await start(update, context)   # ✅ show full instruction message
+    if any(word in user_text for word in greetings):
+        await update.message.reply_text(
+            f"👋 Hey {first_name}!\n\n"
+            "I'm your Finance Tracker Bot 💰\n"
+            "You can track expenses like:\n\n"
+            "• spent 200 on coffee\n"
+            "• received 5000 salary\n\n"
+            "Type /help to see full guide 📘"
+        )
         return
 
-    # ── 2. Continue existing logic ───────────────────────
+    if any(word in user_text for word in help_words):
+        await start(update, context)   # full instructions
+        return
+
+    # ── 2. Existing Logic ──────────────────────────────
     parsed_list = parse_message(user_text)
 
     for parsed in parsed_list:
@@ -622,12 +630,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     transactions = [p for p in parsed_list if p.get("action") == "add_transaction"]
 
-    # ── 3. Replace THIS fallback ─────────────────────────
+    # ── 3. Smart Fallback ──────────────────────────────
     if not transactions:
-        await start(update, context)   # 🔥 instead of "Didn't catch that"
+        await update.message.reply_text(
+            "🤔 I didn't understand that.\n\n"
+            "Try something like:\n"
+            "• spent 200 on food\n"
+            "• received 30000 salary\n\n"
+            "Or type /help for full guide 📘"
+        )
         return
 
-    # ── 4. Existing transaction logic ────────────────────
+    # ── 4. Transaction Logic (same as yours) ───────────
     reply = f"✅ *Recorded {len(transactions)} transaction(s)!*\n\n"
 
     for t in transactions:
