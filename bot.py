@@ -582,29 +582,31 @@ async def split_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Amount must be a number.\nExample: `/split 3000 dinner John,Mary`", parse_mode="Markdown")
 
 # ── Message Handler ───────────────────────────────────────
-
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id, first_name = get_user(update)
-    user_text = update.message.text
-    
+    user_text = update.message.text.lower().strip()
 
-    # ── Greeting / Help Detection ───────────────────────
+    # ── 1. Greeting / Help Detection ───────────────────────
     trigger_words = [
         "hi", "hello", "hey", "hii", "hlo",
-        "help", "how to use", "commands",
-        "what can you do", "usage"
+        "help", "how", "how to use",
+        "commands", "usage", "what can you do"
     ]
 
     if any(word in user_text for word in trigger_words):
-        await start(update, context)   # 🔥 shows your full instruction message
+        await start(update, context)   # ✅ show full instruction message
         return
+
+    # ── 2. Continue existing logic ───────────────────────
     parsed_list = parse_message(user_text)
 
     for parsed in parsed_list:
         action = parsed.get("action", "unknown")
+
         if action == "get_summary":
             await summary_command(update, context)
             return
+
         if action == "set_budget":
             amount = parsed.get("amount")
             category = parsed.get("category", "other")
@@ -620,16 +622,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     transactions = [p for p in parsed_list if p.get("action") == "add_transaction"]
 
+    # ── 3. Replace THIS fallback ─────────────────────────
     if not transactions:
-        await update.message.reply_text(
-            "🤔 Didn't catch that.\n\nTry:\n"
-            "• 'spent 200 on coffee'\n"
-            "• 'received 30000 salary'\n"
-            "• 'food 500, uber 1200, rent 10000'\n"
-            "• 'show summary'"
-        )
+        await start(update, context)   # 🔥 instead of "Didn't catch that"
         return
 
+    # ── 4. Existing transaction logic ────────────────────
     reply = f"✅ *Recorded {len(transactions)} transaction(s)!*\n\n"
 
     for t in transactions:
@@ -653,7 +651,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply += f"   ⚠️ *Budget warning! {percent:.0f}% used*\n"
 
     await update.message.reply_text(reply, parse_mode="Markdown")
-
 # ── Main ──────────────────────────────────────────────────
 
 def main():
