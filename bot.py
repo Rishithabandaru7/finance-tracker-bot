@@ -52,38 +52,100 @@ def get_user(update: Update):
     return user.id, user.first_name
 
 # ── Start ─────────────────────────────────────────────────
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id, first_name = get_user(update)
-    msg = f"""👋 *Welcome {first_name}!*
+    msg = f"""👋 *Welcome {first_name} to Finance Tracker Bot!*
 
-I'm your personal Finance Tracker Bot.
+I understand natural language — just type like you're texting a friend! 🤖
 
-💸 *Track Expenses:*
-- "spent 500 on lunch"
-- "food 500, uber 1200, rent 10000"
+━━━━━━━━━━━━━━━━━━━━━
+💸 *TRACK EXPENSES*
+━━━━━━━━━━━━━━━━━━━━━
+Just type naturally:
+- `spent 500 on lunch`
+- `paid 1200 for uber`
+- `bought medicines 350`
+- `rent 10000`
 
-💰 *Track Income:*
-- "received 50000 salary"
+Multiple at once:
+- `food 500, uber 1200, rent 10000`
 
-📊 *Commands:*
+━━━━━━━━━━━━━━━━━━━━━
+💰 *TRACK INCOME*
+━━━━━━━━━━━━━━━━━━━━━
+- `received 50000 salary`
+- `got 5000 freelance payment`
+- `business income 20000`
+
+━━━━━━━━━━━━━━━━━━━━━
+📊 *VIEW REPORTS*
+━━━━━━━━━━━━━━━━━━━━━
 - /summary — monthly breakdown
 - /recent — last 5 transactions
-- /export — download Excel report
 - /chart — spending pie chart
-- /budget food 5000 — set budget
-- /goal add iPhone 80000 — savings goal
-- /goal add 5000 iPhone — add to goal
-- /goals — view all goals
-- /bill add Electricity 1500 5 — bill reminder (due day 5)
-- /bills — view all bills
-- /split 3000 dinner John,Mary — split expense
-- /addcategory gym expense — add custom category
-- /categories — view your categories
-- /delete 5 — delete transaction
-- /delete all — delete everything
+- /export — download Excel report
 
-Your data is *private* 🔒"""
+━━━━━━━━━━━━━━━━━━━━━
+🎯 *BUDGET MANAGEMENT*
+━━━━━━━━━━━━━━━━━━━━━
+- `/budget food 5000` — set ₹5000 food budget
+- Auto alert at 80% and 100% usage!
+
+━━━━━━━━━━━━━━━━━━━━━
+🎯 *SAVINGS GOALS*
+━━━━━━━━━━━━━━━━━━━━━
+- `/goal add iPhone 80000` — create goal
+- `/goal save iPhone 5000` — add savings
+- `/goals` — view all goals with progress bar
+
+━━━━━━━━━━━━━━━━━━━━━
+🔔 *BILL REMINDERS*
+━━━━━━━━━━━━━━━━━━━━━
+- `/bill add Electricity 1500 5` — due on 5th
+- `/bills` — view all bills
+- Auto reminder 3 days, 1 day & on due date!
+
+━━━━━━━━━━━━━━━━━━━━━
+👥 *SPLIT EXPENSES*
+━━━━━━━━━━━━━━━━━━━━━
+- `/split 3000 dinner John,Mary`
+- Calculates each person's share instantly!
+
+━━━━━━━━━━━━━━━━━━━━━
+🏷️ *CUSTOM CATEGORIES*
+━━━━━━━━━━━━━━━━━━━━━
+- `/addcategory gym expense` — add category
+- `/categories` — view all categories
+
+━━━━━━━━━━━━━━━━━━━━━
+🗑️ *DELETE TRANSACTIONS*
+━━━━━━━━━━━━━━━━━━━━━
+- `/recent` — see last 5 with IDs
+- `/delete 5` — delete transaction #5
+- `/delete all` — fresh start
+
+━━━━━━━━━━━━━━━━━━━━━
+📅 *AUTO WEEKLY SUMMARY*
+━━━━━━━━━━━━━━━━━━━━━
+Every Sunday 8PM you'll automatically
+receive your weekly spending summary! 📬
+
+━━━━━━━━━━━━━━━━━━━━━
+🏦 *DEFAULT CATEGORIES*
+━━━━━━━━━━━━━━━━━━━━━
+Expenses: food, transport, shopping,
+entertainment, health, bills, rent, other
+
+Income: salary, freelance, business,
+investment, other
+
+━━━━━━━━━━━━━━━━━━━━━
+🔒 Your data is *completely private*
+Nobody else can see your transactions!
+━━━━━━━━━━━━━━━━━━━━━
+
+*Start now — type your first expense!* 💪
+Example: `spent 500 on lunch`"""
     await update.message.reply_text(msg, parse_mode="Markdown")
 
 # ── Summary ───────────────────────────────────────────────
