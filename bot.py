@@ -23,7 +23,8 @@ from database import (
     get_all_users, add_savings_goal, update_savings_goal,
     get_savings_goals, add_bill_reminder, get_bill_reminders,
     delete_bill_reminder, add_custom_category,
-    get_custom_categories, add_split_expense, get_split_expenses
+    get_custom_categories, add_split_expense, get_split_expenses,
+    get_last_month_summary, get_specific_month_summary, get_all_months
 )
 from groq_parser import parse_message
 from scheduler import start_scheduler, build_summary_message
@@ -672,6 +673,72 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #-----
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await start(update, context)   # reuse your full instruction message
+#-------------
+async def lastmonth_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id, first_name = get_user(update)
+    rows = get_last_month_summary(user_id)
+    from datetime import timedelta
+    last_month = (datetime.now().replace(day=1) - timedelta(days=1)).strftime("%B %Y")
+    msg = build_summary_message(rows, f"{first_name}'s Summary — {last_month}")
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+async def history_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id, first_name = get_user(update)
+    months = get_all_months(user_id)
+
+    if not months:
+        await update.message.reply_text("No transaction history found!")
+        return
+
+    msg = f"📅 *{first_name}'s Monthly History:*\n\n"
+    msg += "Tap a command to see that month's summary:\n\n"
+
+    for month in months:
+        year, m = month.split("-")
+        month_name = datetime.strptime(month, "%Y-%m").strftime("%B %Y")
+        msg += f"📊 `/month {year} {m}` — {month_name}\n"
+
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+async def month_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id, first_name = get_user(update)
+    args = context.args
+
+    if len(args) != 2:
+        await update.message.reply_text(
+            "Usage: `/month <year> <month>`\n"
+            "Example: `/month 2026 04` for April 2026\n\n"
+            "Use /history to see all available months!",
+            parse_mode="Markdown"
+        )
+        return
+
+    try:
+        year = int(args[0])
+        month = int(args[1])
+
+        if not 1 <= month <= 12:
+            await update.message.reply_text("❌ Month must be between 1 and 12")
+            return
+
+        rows = get_specific_month_summary(user_id, year, month)
+        month_name = datetime(year, month, 1).strftime("%B %Y")
+
+        if not rows:
+            await update.message.reply_text(
+                f"No transactions found for {month_name}!"
+            )
+            return
+
+        msg = build_summary_message(rows, f"{first_name}'s Summary — {month_name}")
+        await update.message.reply_text(msg, parse_mode="Markdown")
+
+    except ValueError:
+        await update.message.reply_text(
+            "❌ Invalid year or month.\n"
+            "Example: `/month 2026 04`",
+            parse_mode="Markdown"
+        )
 # ── Main ──────────────────────────────────────────────────
 
 def main():
@@ -703,6 +770,9 @@ def main():
     app.add_handler(CommandHandler("addcategory", addcategory_command))
     app.add_handler(CommandHandler("categories", categories_command))
     app.add_handler(CommandHandler("split", split_command))
+    app.add_handler(CommandHandler("lastmonth", lastmonth_command))
+    app.add_handler(CommandHandler("history", history_command))
+    app.add_handler(CommandHandler("month", month_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     app.run_polling()

@@ -388,3 +388,51 @@ def get_split_expenses(user_id):
     c.close()
     conn.close()
     return rows
+def get_last_month_summary(user_id):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute('''
+        SELECT type, category, SUM(amount)
+        FROM transactions
+        WHERE user_id = %s 
+        AND TO_CHAR(date, 'YYYY-MM') = TO_CHAR(
+            CURRENT_DATE - INTERVAL '1 month', 'YYYY-MM'
+        )
+        GROUP BY type, category
+        ORDER BY type, SUM(amount) DESC
+    ''', (user_id,))
+    rows = c.fetchall()
+    c.close()
+    conn.close()
+    return rows
+
+def get_specific_month_summary(user_id, year, month):
+    conn = get_conn()
+    c = conn.cursor()
+    month_str = f"{year}-{month:02d}"
+    c.execute('''
+        SELECT type, category, SUM(amount)
+        FROM transactions
+        WHERE user_id = %s
+        AND TO_CHAR(date, 'YYYY-MM') = %s
+        GROUP BY type, category
+        ORDER BY type, SUM(amount) DESC
+    ''', (user_id, month_str))
+    rows = c.fetchall()
+    c.close()
+    conn.close()
+    return rows
+
+def get_all_months(user_id):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute('''
+        SELECT DISTINCT TO_CHAR(date, 'YYYY-MM') as month
+        FROM transactions
+        WHERE user_id = %s
+        ORDER BY month DESC
+    ''', (user_id,))
+    rows = c.fetchall()
+    c.close()
+    conn.close()
+    return [row[0] for row in rows]
