@@ -144,16 +144,3 @@ This bot is deployed on [Render](https://render.com) as a background worker serv
 
 ---
 
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
-
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-<p align="center">Built with ❤️ by <a href="https://github.com/Rishithabandaru7">Rishitha Bandaru</a></p>
